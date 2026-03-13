@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderService.DataAccess.Postgres.Models
+namespace OrderService.DataAccess.Postgres.Models.DTO
 {
-    public class Order
+    public class OrderDTO
     {
-        public long Id { get; set; }
         public long ProductId { get; set; }
         public int Amount { get; set; }
         public string EmailClient { get; set; }

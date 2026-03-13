@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OrderService.DataAccess.Postgres.Models;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,9 @@ namespace OrderService.DataAccess.Postgres.Context
     public class AppDbContext : DbContext
     {
         public DbSet<Order> Orders { get; set; }
-        public AppDbContext()
+        public AppDbContext(DbContextOptions options) : base(options)
         {
-            Database.EnsureCreated();
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Server=localhost;Port=5432;Database=OrderService;User Id=postgres;Password=31121985;");
-        }
+
     }
 }

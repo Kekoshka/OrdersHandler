@@ -1,0 +1,24 @@
+﻿using FluentValidation;
+using OrderService.WebApi.Extensions;
+using OrderService.WebApi.Mediatr.Commands;
+
+namespace OrderService.WebApi.Validators
+{
+    /// <summary>
+    /// Валидатор команд создания заказов
+    /// </summary>
+    public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
+    {
+        /// <summary>
+        /// Валидирует команды создания заказов
+        /// </summary>
+        public CreateOrderCommandValidator()
+        {
+            RuleFor(x => x.Price).ValidatePositiveNumber();
+            RuleFor(x => x.PhoneNumber).ValidatePhoneNumber();
+            RuleFor(x => x.EmailClient).EmailAddress();
+            RuleFor(x => x.ProductId).ValidatePositiveNumber();
+            RuleFor(x => x.Amount).ValidatePositiveNumber();
+        }
+    }
+}
