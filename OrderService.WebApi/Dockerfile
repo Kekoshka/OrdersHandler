@@ -1,29 +1,35 @@
-# См. статью по ссылке https://aka.ms/customizecontainer, чтобы узнать как настроить контейнер отладки и как Visual Studio использует этот Dockerfile для создания образов для ускорения отладки.
+# OrderService.WebApi/Dockerfile
 
-# Этот этап используется при запуске из VS в быстром режиме (по умолчанию для конфигурации отладки)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
-# Этот этап используется для сборки проекта службы
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["OrderService.WebApi/OrderService.WebApi.csproj", "OrderService.WebApi/"]
-RUN dotnet restore "./OrderService.WebApi/OrderService.WebApi.csproj"
-COPY . .
-WORKDIR "/src/OrderService.WebApi"
-RUN dotnet build "./OrderService.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Этот этап используется для публикации проекта службы, который будет скопирован на последний этап
+# Копируем все csproj-файлы, чтобы восстановить зависимости
+COPY ["OrderService.WebApi/OrderService.WebApi.csproj", "OrderService.WebApi/"]
+COPY ["OrderService.DataAccess.Postgres/OrderService.DataAccess.Postgres.csproj", "OrderService.DataAccess.Postgres/"]
+# Если есть ещё общие проекты (например, OrderService.Common), добавьте их аналогично
+
+# Восстанавливаем пакеты для основного проекта (зависимости подтянутся)
+RUN dotnet restore "OrderService.WebApi/OrderService.WebApi.csproj"
+
+# Копируем все исходники всех проектов
+COPY OrderService.WebApi/ OrderService.WebApi/
+COPY OrderService.DataAccess.Postgres/ OrderService.DataAccess.Postgres/
+# ... остальные проекты
+
+WORKDIR "/src/OrderService.WebApi"
+RUN dotnet build "OrderService.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./OrderService.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "OrderService.WebApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Этот этап используется в рабочей среде или при запуске из VS в обычном режиме (по умолчанию, когда конфигурация отладки не используется)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

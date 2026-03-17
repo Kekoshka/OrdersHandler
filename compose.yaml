@@ -1,0 +1,104 @@
+services:
+  kafka:
+    image: apache/kafka:4.2.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - backend
+
+  order-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass
+      POSTGRES_DB: OrderService
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  payment-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: paymentuser
+      POSTGRES_PASSWORD: paymentpass
+      POSTGRES_DB: PaymentService
+    ports:
+      - "5433:5432"
+    volumes:
+      - payment-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  order-service:
+    build:
+      context: .
+      dockerfile: /OrderService.WebApi/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=order-db;Port=5432;Database=OrderService;Username=orderuser;Password=orderpass
+      - Kafka__BootstrapServers=localhost:9092
+    depends_on:
+      - order-db
+      - kafka
+    networks:
+      - backend
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: /PaymentService.WebApi/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__PostgreSql=Host=payment-db;Port=5432;Database=PaymentService;Username=paymentuser;Password=paymentpass
+      - Kafka__BootstrapServers=localhost:9092
+    depends_on:
+      - payment-db
+      - kafka
+    networks:
+      - backend
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: /NotificationService.Console/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Kafka__BootstrapServers=localhost:9092
+    depends_on:
+      - kafka
+    networks:
+      - backend
+
+volumes:
+  order-data:
+  payment-data:
+  kafka-data:
+
+networks:
+  backend:
+    driver: bridge
