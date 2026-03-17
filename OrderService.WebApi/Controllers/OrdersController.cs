@@ -34,7 +34,7 @@ namespace OrderService.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrderAsync(CreateOrderCommand command, CancellationToken cancellationToken)
         {
-            var orderId = await _mediator.Send(command);
+            var orderId = await _mediator.Send(command, cancellationToken);
             return Ok(orderId);
         }
 
@@ -48,7 +48,7 @@ namespace OrderService.WebApi.Controllers
         public async Task<IActionResult> GetOrderAsync(long orderId, CancellationToken cancellationToken)
         {
             GetOrderQuery query = new() { OrderId = orderId };
-            var order = await _mediator.Send(query);
+            var order = await _mediator.Send(query, cancellationToken);
             return Ok(order);
         }
 
@@ -62,7 +62,7 @@ namespace OrderService.WebApi.Controllers
         public async Task<IActionResult> DeleteOrderAsync(long id, CancellationToken cancellationToken)
         {
             DeleteOrderCommand command = new() { OrderId = id };
-            await _mediator.Send(command);
+            await _mediator.Send(command, cancellationToken);
             return NoContent();
         }
     }

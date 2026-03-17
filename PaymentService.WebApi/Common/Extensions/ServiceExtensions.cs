@@ -1,13 +1,16 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using OrderService.DataAccess.Postgres.Context;
-using OrderService.WebApi.Behaviors;
-using OrderService.WebApi.Mappers.CustomExceptions;
-using OrderService.WebApi.Options;
+using PaymentService.DataAccess.Postgres.Context;
+using PaymentService.DataAccess.Postgres.Models;
+using PaymentService.WebApi.Common.Behaviors;
+using PaymentService.WebApi.Common.Extensions;
+using PaymentService.WebApi.Common.Options;
+using PaymentService.WebApi.Common.CustomExceptions;
+using System.Data;
 using System.Reflection;
 
-namespace OrderService.WebApi.Extensions
+namespace PaymentService.WebApi.Common.Extensions
 {
     /// <summary>
     /// Содержит методы расширения для регистрации сервисов.
@@ -58,7 +61,8 @@ namespace OrderService.WebApi.Extensions
         }
 
         /// <summary>
-        /// Добавляет и настраивает контекст базы данных для работы с PostgreSQL.
+        /// Настраивает базу данных для работы с PostgreSQL 
+        /// и заполняет таблицу Statuses начальными данными.
         /// </summary>
         /// <param name="services">Коллекция сервисов.</param>
         /// <param name="configuration">Конфигурация приложения, содержащая строки подключения.</param>
@@ -70,6 +74,40 @@ namespace OrderService.WebApi.Extensions
                 if (connectionString is null)
                     throw new NotFoundException($"Connection string with name {ConfigNameConnectionStringPostgre} not found");
                 config.UseNpgsql(connectionString);
+                config.UseSeeding((context, _) =>
+                {
+                    var rowsCount = context.Set<Status>().Count();
+                    if (rowsCount == 0)
+                    {
+                        List<Status> statusesSeed = new()
+                        {
+                            new(){ Id = 1, Name = "Complete" },
+                            new(){ Id = 2, Name = "In progress" }
+                        };
+                        context.Set<Status>().AddRange(statusesSeed);
+                        context.SaveChanges();
+                    }
+                });
+            });
+        }
+        public static void UseSeeding(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<AppDbContext>(config =>
+            {
+                config.UseSeeding((context, _) =>
+                {
+                    var rowsCount = context.Set<Status>().Count();
+                    if (rowsCount == 0)
+                    {
+                        var statuses = configuration
+                            .GetSection("SeedStatusesData")
+                            .Get<List<Status>>();
+                        if (statuses is null)
+                            throw new DirectoryNotFoundException("Section \"SeedStatusesData\" in appsetings not found");
+                        context.Set<Status>().AddRange(statuses);
+                        context.SaveChanges();
+                    }
+                });
             });
         }
 
@@ -81,6 +119,15 @@ namespace OrderService.WebApi.Extensions
         public static void ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<ContentTypesOptions>(configuration.GetSection(nameof(ContentTypesOptions)));
+            services.Configure<StatusesOptions>(options =>
+            {
+                var statuses = configuration.GetSection("SeedStatusesData").Get<List<Status>>();
+                if (statuses is null)
+                    throw new DirectoryNotFoundException("Section \"SeedStatusesData\" in appsetings not found");
+                options.CompletedId = statuses.First(s => s.Name == "Completed").Id;
+                options.InProgressId = statuses.First(s => s.Name == "In progress").Id;
+
+            });
         }
 
         /// <summary>

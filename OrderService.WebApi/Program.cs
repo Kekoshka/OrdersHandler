@@ -20,17 +20,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
-
 app.UseExceptionHandling();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
-    }
     app.UseSwagger().UseSwaggerUI();
 }
 

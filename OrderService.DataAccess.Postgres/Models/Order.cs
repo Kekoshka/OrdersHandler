@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace OrderService.DataAccess.Postgres.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Order
     {
         public long Id { get; set; }

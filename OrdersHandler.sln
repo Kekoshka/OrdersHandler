@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+VisualStudioVersion = 17.14.36603.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.WebApi", "OrderService.WebApi\OrderService.WebApi.csproj", "{B7DD7902-C854-450F-A555-5D05B753E338}"
 EndProject
@@ -14,6 +14,21 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService.WebApi", "PaymentService.WebApi\PaymentService.WebApi.csproj", "{8A8BC47E-04BC-4A60-BE1B-310F8CAACBEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService.DataAccess.Postgres", "PaymentService.DataAccess.Postgres\PaymentService.DataAccess.Postgres.csproj", "{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OrderService", "OrderService", "{36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PaymentService", "PaymentService", "{66957C00-4C78-49A8-BE0F-D898D79A6E2C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NotificationService", "NotificationService", "{C6130C64-C8AD-4244-BE7B-4C326E89C842}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.DataAccess.Postgres", "NotificationService.DataAccess.Postgres\NotificationService.DataAccess.Postgres.csproj", "{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Console", "NotificationService.Console\NotificationService.Console.csproj", "{82094A63-8010-43D3-B57B-03DCE8C4FE38}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,9 +60,27 @@ Global
 		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82094A63-8010-43D3-B57B-03DCE8C4FE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82094A63-8010-43D3-B57B-03DCE8C4FE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82094A63-8010-43D3-B57B-03DCE8C4FE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82094A63-8010-43D3-B57B-03DCE8C4FE38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B7DD7902-C854-450F-A555-5D05B753E338} = {36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}
+		{56137353-722B-41CA-8BA1-F8BDBEE419F7} = {36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}
+		{31C3977E-E389-406D-B2A8-C445D5DC719C} = {36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}
+		{6675173F-9C8E-41F0-ACBB-57849A69BC30} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
+		{8A8BC47E-04BC-4A60-BE1B-310F8CAACBEA} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
+		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
+		{4ECE02F5-251D-4C92-99DE-A8B1FFB1318D} = {C6130C64-C8AD-4244-BE7B-4C326E89C842}
+		{82094A63-8010-43D3-B57B-03DCE8C4FE38} = {C6130C64-C8AD-4244-BE7B-4C326E89C842}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4039AE49-1DBD-484E-9A27-2DFD48F65D7F}
