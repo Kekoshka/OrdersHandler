@@ -1,0 +1,32 @@
+{
+  "type": "record",
+  "name": "OrderCreated",
+  "namespace": "OrderService",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "ProductId",
+      "type": "long"
+    },
+    {
+      "name": "Amount",
+      "type": "int"
+    },
+    {
+      "name": "EmailClient",
+      "type": "string"
+    },
+    {
+      "name": "Price",
+      "type": "bytes",
+      "logicalType": "decimal"
+    },
+    {
+      "name": "PhoneNumber",
+      "type": "string"
+    }
+  ]
+}

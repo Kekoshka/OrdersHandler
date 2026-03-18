@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OrderService.DataAccess.Postgres.Context;
-using OrderService.DataAccess.Postgres.Models;
-using OrderService.DataAccess.Postgres.Models.DTO;
-using OrderService.WebApi.Mappers;
-using OrderService.WebApi.Mappers.CustomExceptions;
+﻿using OrderService.DataAccess.Postgres.Models.DTO;
 
 namespace OrderService.WebApi.Interfaces
 {

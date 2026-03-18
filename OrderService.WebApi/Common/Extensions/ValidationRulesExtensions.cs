@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using System.Numerics;
 
-namespace OrderService.WebApi.Extensions
+namespace OrderService.WebApi.Common.Extensions
 {
     /// <summary>
     /// Методы расширения правил валидации

@@ -119,6 +119,7 @@ namespace PaymentService.WebApi.Common.Extensions
         public static void ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<ContentTypesOptions>(configuration.GetSection(nameof(ContentTypesOptions)));
+            services.Configure<KafkaOptions>(configuration.GetSection(nameof(KafkaOptions)));
             services.Configure<StatusesOptions>(options =>
             {
                 var statuses = configuration.GetSection("SeedStatusesData").Get<List<Status>>();

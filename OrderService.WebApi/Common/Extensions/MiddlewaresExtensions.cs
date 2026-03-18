@@ -1,6 +1,6 @@
 ﻿using ProjectManagementSystemBackend.Middlewares;
 
-namespace OrderService.WebApi.Extensions
+namespace OrderService.WebApi.Common.Extensions
 {
     public static class MiddlewaresExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 
-namespace OrderService.WebApi.Behaviors
+namespace OrderService.WebApi.Common.Behaviors
 {
     /// <summary>
     /// Выполняет валидацию входящего запроса с помощью всех зарегистрированных валидаторов,

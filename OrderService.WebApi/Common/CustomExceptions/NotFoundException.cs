@@ -1,4 +1,4 @@
-﻿namespace OrderService.WebApi.Mappers.CustomExceptions
+﻿namespace OrderService.WebApi.Common.CustomExceptions
 {
     public class NotFoundException : Exception
     {

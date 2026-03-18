@@ -1,4 +1,4 @@
-﻿namespace OrderService.WebApi.Options
+﻿namespace OrderService.WebApi.Common.Options
 {
     /// <summary>
     /// Опции типов контента

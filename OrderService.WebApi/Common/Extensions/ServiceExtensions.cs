@@ -2,12 +2,13 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using OrderService.DataAccess.Postgres.Context;
-using OrderService.WebApi.Behaviors;
-using OrderService.WebApi.Mappers.CustomExceptions;
-using OrderService.WebApi.Options;
+using OrderService.WebApi.Common.Behaviors;
+using OrderService.WebApi.Common.Extensions;
+using OrderService.WebApi.Common.Options;
+using OrderService.WebApi.Common.CustomExceptions;
 using System.Reflection;
 
-namespace OrderService.WebApi.Extensions
+namespace OrderService.WebApi.Common.Extensions
 {
     /// <summary>
     /// Содержит методы расширения для регистрации сервисов.

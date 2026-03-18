@@ -1,6 +1,6 @@
 using FluentValidation;
 using OrderService.DataAccess.Postgres.Context;
-using OrderService.WebApi.Extensions;
+using OrderService.WebApi.Common.Extensions;
 using ProjectManagementSystemBackend.Middlewares;
 using System.Reflection;
 

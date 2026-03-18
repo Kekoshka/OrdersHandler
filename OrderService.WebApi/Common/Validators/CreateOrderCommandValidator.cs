@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using OrderService.WebApi.Extensions;
+using OrderService.WebApi.Common.Extensions;
 using OrderService.WebApi.Mediatr.Commands;
 
-namespace OrderService.WebApi.Validators
+namespace OrderService.WebApi.Common.Validators
 {
     /// <summary>
     /// Валидатор команд создания заказов

@@ -14,21 +14,24 @@ namespace PaymentService.WebApi.Services
         AppDbContext _context;
         PaymentMapper _paymentMapper;
         StatusesOptions _statuses;
+        IKafkaService _kafkaService;
         public PaymentService(AppDbContext context,
             PaymentMapper paymentMapper,
-            IOptions<StatusesOptions> statuses) 
+            IOptions<StatusesOptions> statuses,
+            IKafkaService kafkaService)
         {
             _context = context;
             _paymentMapper = paymentMapper;
             _statuses = statuses.Value;
+            _kafkaService = kafkaService;
         }
         public async Task<long> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, CancellationToken cancellationToken)
         {
             var payment = _paymentMapper.GetPaymentDTOToPayment(createPaymentDTO);
             payment.DateCreate = DateTime.UtcNow;
             payment.StatusId = _statuses.InProgressId;
-            await _context.AddAsync(payment);
-            await _context.SaveChangesAsync();
+            await _context.AddAsync(payment,cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             return payment.Id;
         }
         public async Task UpdatePaymentAsync(long paymentId, long statusId, CancellationToken cancellationToken)
@@ -36,13 +39,15 @@ namespace PaymentService.WebApi.Services
             var updatedPayments = await _context.Payments
                 .Where(p => p.Id == paymentId)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(p => p.StatusId, statusId));
+                    .SetProperty(p => p.StatusId, statusId), cancellationToken);
             if (updatedPayments == 0)
                 throw new NotFoundException($"Payment with id {paymentId} not found");
+            if (statusId == _statuses.CompletedId)
+                await _kafkaService.ProduceAsync("paymentService", "paymentComplete", cancellationToken);
         }
         public async Task<GetPaymentDTO> GetPaymentAsync(long paymentId, CancellationToken cancellationToken)
         {
-            var payment = await _context.Payments.FindAsync(paymentId);
+            var payment = await _context.Payments.FindAsync(paymentId,cancellationToken);
             return payment is not null ?
                 _paymentMapper.PaymentToGetPaymentDTO(payment)
                 : throw new NotFoundException($"Payment with id {paymentId} not found");

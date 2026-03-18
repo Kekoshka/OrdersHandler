@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.Options;
-using OrderService.WebApi.Mappers.CustomExceptions;
-using OrderService.WebApi.Options;
+using OrderService.WebApi.Common.CustomExceptions;
+using OrderService.WebApi.Common.Options;
 
 namespace ProjectManagementSystemBackend.Middlewares
 {

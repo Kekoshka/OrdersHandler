@@ -4,7 +4,7 @@ using OrderService.WebApi.Mediatr.Commands;
 using OrderService.WebApi.Mediatr.Queries;
 using Riok.Mapperly.Abstractions;
 
-namespace OrderService.WebApi.Mappers
+namespace OrderService.WebApi.Common.Mappers
 {
     /// <summary>
     /// Маппер для объектов заказов

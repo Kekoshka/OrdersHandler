@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using OrderService.WebApi.Common.Mappers;
 using OrderService.WebApi.Interfaces;
-using OrderService.WebApi.Mappers;
 using OrderService.WebApi.Mediatr.Commands;
 
 namespace OrderService.WebApi.Mediatr.Handlers

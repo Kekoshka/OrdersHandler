@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using OrderService.DataAccess.Postgres.Models.DTO;
+using OrderService.WebApi.Common.Mappers;
 using OrderService.WebApi.Interfaces;
-using OrderService.WebApi.Mappers;
 using OrderService.WebApi.Mediatr.Queries;
 
 namespace OrderService.WebApi.Mediatr.Handlers
