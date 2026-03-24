@@ -1,8 +1,18 @@
 ﻿namespace PaymentService.WebApi.Common.Options
 {
+    /// <summary>
+    /// Настройки статусов платежа
+    /// </summary>
     public class StatusesOptions
     {
-        public long CompletedId { get; set; }
-        public long InProgressId { get; set; }
+        /// <summary>
+        /// В процессе
+        /// </summary>
+        public int InProgress { get; set; }
+        
+        /// <summary>
+        /// Выполнен
+        /// </summary>
+        public int IsCompleted { get; set; }
     }
 }

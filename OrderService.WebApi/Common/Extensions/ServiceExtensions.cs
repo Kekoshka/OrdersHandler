@@ -5,8 +5,10 @@ using OrderService.DataAccess.Postgres.Context;
 using OrderService.WebApi.Common.Behaviors;
 using OrderService.WebApi.Common.Extensions;
 using OrderService.WebApi.Common.Options;
-using OrderService.WebApi.Common.CustomExceptions;
 using System.Reflection;
+using Refit;
+using PaymentService.WebApi.Common.Options;
+using ExceptionHandler.Exceptions;
 
 namespace OrderService.WebApi.Common.Extensions
 {
@@ -82,6 +84,34 @@ namespace OrderService.WebApi.Common.Extensions
         public static void ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<ContentTypesOptions>(configuration.GetSection(nameof(ContentTypesOptions)));
+            services.Configure<ExternalServicesOptions>(configuration.GetSection(nameof(ExternalServicesOptions)));
+            services.Configure<DataTypesOptions>(configuration.GetSection(nameof(DataTypesOptions)));
+
+        }
+
+        /// <summary>
+        /// Регистрирует Http клиенты для обращения к внешним сервисам через Refit
+        /// </summary>
+        /// <param name="services">Коллекция сервисов</param>
+        /// <param name="configuration">Конфигурация приложения</param>
+        /// <exception cref="NotFoundException">Базовый адрес в appsettings в секции ExternalServicesOptions не найден</exception>
+        public static void AddRefit(this IServiceCollection services, IConfiguration configuration)
+        {
+            var apiInterfaces = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(st => st.IsInterface && st.Name.  StartsWith("I") && st.Name.EndsWith("Api"));
+            foreach (var apiInterface in apiInterfaces)
+            {
+                var serviceName = apiInterface.Name.Substring(1,apiInterface.Name.Length-4);
+                var baseAddress = configuration
+                    .GetSection(nameof(ExternalServicesOptions))
+                    .GetValue<string>(serviceName + "Address");
+                if (baseAddress is null)
+                    throw new NotFoundException($"Base address for {serviceName} not found");
+
+                services.AddRefitClient(apiInterface)
+                    .ConfigureHttpClient(c => c.BaseAddress = new Uri(baseAddress));
+            }
         }
 
         /// <summary>

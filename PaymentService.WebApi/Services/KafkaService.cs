@@ -1,4 +1,6 @@
 ﻿using Confluent.Kafka;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
 using Microsoft.Extensions.Options;
 using PaymentService.WebApi.Common.Options;
 using PaymentService.WebApi.Interfaces;
@@ -6,35 +8,68 @@ using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace PaymentService.WebApi.Services
 {
+    /// <summary>
+    /// Сервис общения с Kafka
+    /// </summary>
     public class KafkaService : IKafkaService
     {
+        /// <summary>
+        /// Настройки внешних сервисов
+        /// </summary>
+        ExternalServicesOptions _servicesOptions;
+        
+        /// <summary>
+        /// Логгер
+        /// </summary>
         ILogger _logger;
-        KafkaOptions _kafkaOptions;
 
         public KafkaService(ILogger<KafkaService> logger,
-            IOptions<KafkaOptions> kafkaOptions) 
+            IOptions<ExternalServicesOptions> servicesOptions)
         {
-            _kafkaOptions = kafkaOptions.Value;
             _logger = logger;
+            _servicesOptions = servicesOptions.Value;
         }
 
-        public async Task ProduceAsync(string topic, string message, CancellationToken cancellationToken)
+        /// <summary>
+        /// Отправка сообщений в Kafka
+        /// </summary>
+        /// <typeparam name="TKey">Тип ключа сообщения</typeparam>
+        /// <typeparam name="TValue">Тип собщения</typeparam>
+        /// <param name="topic">Топик</param>
+        /// <param name="value">Сообщение</param>
+        /// <param name="key">Ключ сообщения</param>
+        /// <param name="cancellationToken">Токен отмены</param>
+        public async Task ProduceAsync<TKey, TValue>(string topic,
+            TValue value,
+            TKey key,
+            CancellationToken cancellationToken)
         {
-            var config = new ProducerConfig()
+            var producerConfig = new ProducerConfig()
             {
-                BootstrapServers = _kafkaOptions.ServerAddress
+                BootstrapServers = _servicesOptions.KafkaAddress
             };
 
-            using var producer = new ProducerBuilder<Null, string>(config).Build();
+            var schemaRegistryConfig = new SchemaRegistryConfig()
+            {
+                Url = _servicesOptions.SchemaRegistryAddress
+            };
 
-            try
+            using var schemaRegistry = new CachedSchemaRegistryClient(schemaRegistryConfig);
+
+            using var producer = new ProducerBuilder<TKey, TValue>(producerConfig)
+                .SetValueSerializer(new AvroSerializer<TValue>(schemaRegistry))
+                .Build();
+
+            var message = new Message<TKey, TValue>()
             {
-                var deliveryResult = await producer.ProduceAsync(topic, new Message<Null, string> { Value = message },cancellationToken);
-            }
-            catch (ProduceException<Null, string> e)
-            {
-                _logger.LogError($"Ошибка доставки: {e.Error.Reason}");
-            }
+                Key = key,
+                Value = value
+            };
+
+            var deliveryResult = await producer.ProduceAsync(topic, message, cancellationToken);
+
+            if (deliveryResult.Status == PersistenceStatus.NotPersisted)
+                _logger.LogWarning($"Message with offset {deliveryResult.Offset} to topic {topic} not persisted");
         }
     }
 }

@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace PaymentService.DataAccess.Postgres.Context
 {
+    /// <summary>
+    /// Контекст для общения с базой данных платежей
+    /// </summary>
     public class AppDbContext : DbContext
     {
+        /// <summary>
+        /// Модель таблицы платежей
+        /// </summary>
         public DbSet<Payment> Payments { get; set; }
-        public DbSet<Status> Statuses { get; set; }
 
         public AppDbContext(DbContextOptions options) : base(options) { }
     }

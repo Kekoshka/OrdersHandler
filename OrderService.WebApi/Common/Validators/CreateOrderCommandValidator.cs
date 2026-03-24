@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using OrderService.WebApi.Common.Extensions;
-using OrderService.WebApi.Mediatr.Commands;
+using OrderService.WebApi.Mediatr;
 
 namespace OrderService.WebApi.Common.Validators
 {

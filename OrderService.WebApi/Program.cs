@@ -1,7 +1,7 @@
+using ExceptionHandler;
 using FluentValidation;
 using OrderService.DataAccess.Postgres.Context;
 using OrderService.WebApi.Common.Extensions;
-using ProjectManagementSystemBackend.Middlewares;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,7 @@ builder.Services.RegisterMappers();
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.ConfigureOptions(builder.Configuration);
 builder.Services.AddMediatR();
+builder.Services.AddRefit(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

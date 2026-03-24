@@ -1,3 +1,4 @@
+using ExceptionHandler;
 using FluentValidation;
 using PaymentService.DataAccess.Postgres.Context;
 using PaymentService.WebApi.Common.Extensions;
@@ -8,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.RegisterMappers();
 builder.Services.UsePostgreSql(builder.Configuration);
-builder.Services.UseSeeding(builder.Configuration);
 builder.Services.RegisterExecutingAsseblyServices();
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.ConfigureOptions(builder.Configuration);
@@ -27,11 +27,8 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

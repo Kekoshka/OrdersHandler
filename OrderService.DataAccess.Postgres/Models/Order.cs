@@ -7,11 +7,17 @@ using System.Threading.Tasks;
 namespace OrderService.DataAccess.Postgres.Models
 {
     /// <summary>
-    /// 
+    /// Доменная модель заказа
     /// </summary>
     public class Order
     {
+        /// <summary>
+        /// Id заказа
+        /// </summary>
         public long Id { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public long ProductId { get; set; }
         public int Amount { get; set; }
         public string EmailClient { get; set; }

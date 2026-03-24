@@ -2,6 +2,6 @@
 {
     public interface IKafkaService
     {
-        public Task ProduceAsync(string topic, string message,CancellationToken cancellationToken);
+        public Task ProduceAsync<TKey, TValue>(string topic, TValue value, TKey key, CancellationToken cancellationToken);
     }
 }

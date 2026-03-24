@@ -24,14 +24,9 @@ namespace PaymentService.DataAccess.Postgres.Models
         public decimal Price { get; set; }
         
         /// <summary>
-        /// Статус платежа, true - оплачено false - не оплачено
-        /// </summary>
-        public long StatusId { get; set; }
-        
-        /// <summary>
         /// Дата создания платежа
         /// </summary>
         public DateTime DateCreate {get;set;}
-        public Status Status { get; set; }
+        public bool Status { get; set; }
     }
 }

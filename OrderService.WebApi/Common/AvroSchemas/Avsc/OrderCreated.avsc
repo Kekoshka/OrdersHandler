@@ -22,7 +22,9 @@
     {
       "name": "Price",
       "type": "bytes",
-      "logicalType": "decimal"
+      "logicalType": "decimal",
+      "scale": 38,
+      "precision": 10
     },
     {
       "name": "PhoneNumber",

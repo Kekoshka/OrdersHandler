@@ -3,15 +3,16 @@ services:
     image: apache/kafka:4.2.0
     container_name: kafka
     ports:
-      - "9092:9092"
+      - "9092:29092"
     environment:
+      KAFKA_LOG4J_LOGGERS: "kafka.request.logger=DEBUG,kafka.network.RequestChannel$=DEBUG"
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092, PLAINTEXT://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENERS: HOST://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092, INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -38,13 +39,18 @@ services:
   order-db:
     image: postgres:18
     environment:
-      POSTGRES_USER: orderuserx`
+      POSTGRES_USER: orderuser
       POSTGRES_PASSWORD: orderpass
       POSTGRES_DB: OrderService
     ports:
       - "5432:5432"
     volumes:
-      - order-data:/var/lib/postgresql/data
+      - order-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderuser -d OrderService"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
     networks:
       - backend
 
@@ -57,7 +63,12 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - payment-data:/var/lib/postgresql/data
+      - payment-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paymentuser -d PaymentService"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
     networks:
       - backend
 
@@ -69,8 +80,12 @@ services:
       - "5001:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=order-db;Port=5432;Database=OrderService;Username=orderuser;Password=orderpass
-      - Kafka__BootstrapServers=localhost:9092
+      - ASPNETCORE_HTTP_PORTS=80
+      - ConnectionStrings__PostgreSql=Host=order-db;Port=5432;Database=OrderService;Username=orderuser;Password=orderpass
+      - ExternalServicesOptions__PaymentServiceAddress=http://payment-service:80
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - ExternalServicesOptions__OrderServiceTopicNamed=order-service
     depends_on:
       - order-db
       - kafka
@@ -85,8 +100,11 @@ services:
       - "5002:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=80
       - ConnectionStrings__PostgreSql=Host=payment-db;Port=5432;Database=PaymentService;Username=paymentuser;Password=paymentpass
-      - Kafka__BootstrapServers=localhost:9092
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - ExternalServicesOptions__TopicName=payment-service
     depends_on:
       - payment-db
       - kafka
@@ -96,12 +114,20 @@ services:
   notification-service:
     build:
       context: .
-      dockerfile: /NotificationService.Console/Dockerfile
+      dockerfile: /NotificationService.WebApi/Dockerfile
     ports:
       - "5003:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Kafka__BootstrapServers=localhost:9092
+      - ASPNETCORE_HTTP_PORTS=80
+      - ExternalServicesOptions__OrderServiceAddress=order-service:80
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - KafkaConsumersOptions__GroupId=NotificationService
+      - KafkaConsumersOptions__AutoOffsetReset=Earliest
+      - KafkaConsumersOptions__EnableAutoCommit=true
+      - ExternalServicesOptions__OrderServiceTopic=order-service
+      - ExternalServicesOptions__PaymentServiceTopic=payment-service
     depends_on:
       - kafka
     networks:

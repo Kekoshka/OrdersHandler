@@ -1,8 +1,12 @@
-﻿using OrderService.DataAccess.Postgres.Models;
-using OrderService.DataAccess.Postgres.Models.DTO;
-using OrderService.WebApi.Mediatr.Commands;
-using OrderService.WebApi.Mediatr.Queries;
+﻿using Avro;
+using Avro.Util;
+using Microsoft.Extensions.Options;
+using OrderService.DataAccess.Postgres.Models;
+using OrderService.WebApi.Common.DTO;
+using OrderService.WebApi.Mediatr;
+using PaymentService.WebApi.Common.Options;
 using Riok.Mapperly.Abstractions;
+using System.Numerics;
 
 namespace OrderService.WebApi.Common.Mappers
 {
@@ -12,6 +16,12 @@ namespace OrderService.WebApi.Common.Mappers
     [Mapper]
     public partial class OrderMapper
     {
+        DataTypesOptions _dataTypesOptions;
+        public OrderMapper(IOptions<DataTypesOptions> dataTypesOptions) 
+        {
+            _dataTypesOptions = dataTypesOptions.Value;
+        }
+
         /// <summary>
         /// Преобразует DTO заказа в доменную модель заказа
         /// </summary>
@@ -46,5 +56,21 @@ namespace OrderService.WebApi.Common.Mappers
         /// <param name="getOrderQuery">команда получения заказа</param>
         /// <returns>DTO заказа</returns>
         public partial OrderDTO GetOrderQueryToDto(GetOrderQuery getOrderQuery);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns>сообщение о создании заказа</returns>
+        public partial OrderCreated OrderToOrderCreated(Order order);
+
+        private byte[] DecimalToAvroBytes(decimal value)
+        {
+            decimal scaledValue = value * (decimal)Math.Pow(10, _dataTypesOptions.DecimalScale);
+            BigInteger unscaled = new BigInteger(scaledValue);
+            byte[] littleEndian = unscaled.ToByteArray();
+            byte[] bigEndian = littleEndian.Reverse().ToArray();
+            return bigEndian;
+        }
     }
 }

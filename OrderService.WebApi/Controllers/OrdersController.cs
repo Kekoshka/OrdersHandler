@@ -1,8 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OrderService.WebApi.Mediatr.Commands;
-using OrderService.WebApi.Mediatr.Queries;
+using OrderService.WebApi.Mediatr;
 
 namespace OrderService.WebApi.Controllers
 {
@@ -20,7 +19,7 @@ namespace OrderService.WebApi.Controllers
         /// Инициализирует новый экземпляр контроллера заказов.
         /// </summary>
         /// <param name="mediator">Медиатор для отправки команд/запросов</param>
-        public OrdersController(IMediator mediator) 
+        public OrdersController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -31,7 +30,7 @@ namespace OrderService.WebApi.Controllers
         /// <param name="command">Команда создания заказа, содержащая необходимые данные</param>
         /// <param name="cancellationToken">Токен отмены</param>
         /// <returns>Id созданного заказа</returns>
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateOrderAsync(CreateOrderCommand command, CancellationToken cancellationToken)
         {
             var orderId = await _mediator.Send(command, cancellationToken);
@@ -44,7 +43,7 @@ namespace OrderService.WebApi.Controllers
         /// <param name="orderId">Id заказа</param>
         /// <param name="cancellationToken">Токен отмены</param>
         /// <returns>Данные заказа</returns>
-        [HttpGet]
+        [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrderAsync(long orderId, CancellationToken cancellationToken)
         {
             GetOrderQuery query = new() { OrderId = orderId };
@@ -58,10 +57,10 @@ namespace OrderService.WebApi.Controllers
         /// <param name="id">Id заказа</param>
         /// <param name="cancellationToken">Токен отмены</param>
         /// <returns>Статус 204 NoContent при успешном удалении</returns>
-        [HttpDelete]
-        public async Task<IActionResult> DeleteOrderAsync(long id, CancellationToken cancellationToken)
+        [HttpDelete("{orderId}")]
+        public async Task<IActionResult> DeleteOrderAsync(long orderId, CancellationToken cancellationToken)
         {
-            DeleteOrderCommand command = new() { OrderId = id };
+            DeleteOrderCommand command = new() { OrderId = orderId };
             await _mediator.Send(command, cancellationToken);
             return NoContent();
         }

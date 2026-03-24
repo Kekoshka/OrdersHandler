@@ -1,9 +1,9 @@
-﻿using OrderService.DataAccess.Postgres.Models.DTO;
+﻿using OrderService.WebApi.Common.DTO;
 
 namespace OrderService.WebApi.Interfaces
 {
     /// <summary>
-    /// Определяет контракт для сервиса работы с заказами
+    /// Определяет контракты для сервиса работы с заказами
     /// </summary>
     public interface IOrderService
     {

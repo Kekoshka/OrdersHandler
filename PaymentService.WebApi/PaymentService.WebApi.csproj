@@ -12,6 +12,7 @@
     <PackageReference Include="Confluent.Kafka" Version="2.13.2" />
     <PackageReference Include="Confluent.SchemaRegistry" Version="2.13.2" />
     <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.13.2" />
+    <PackageReference Include="ExceptionHandlingMiddlewareLib" Version="1.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
@@ -32,8 +33,4 @@
   <ItemGroup>
     <ProjectReference Include="..\PaymentService.DataAccess.Postgres\PaymentService.DataAccess.Postgres.csproj" />
   </ItemGroup>
-
-  <Target Name="AvroGenerate" BeforeTargets="BeforeBuild">
-	<Exec Command="avrogen -s ./Common/AvroSchemas/Avsc/PaymentCompleted.avsc ./Common/AvroSchemas/" />
-  </Target>
 </Project>
