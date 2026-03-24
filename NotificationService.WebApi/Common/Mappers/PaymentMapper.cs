@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using NotificationService.WebApi.Common.AvroSchemas;
+using NotificationService.WebApi.Common.DTO;
 using NotificationService.WebApi.Common.Options;
-using NotificationService.WebApi.DTO;
 using Riok.Mapperly.Abstractions;
 using System.Numerics;
 

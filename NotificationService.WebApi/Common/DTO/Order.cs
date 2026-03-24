@@ -1,4 +1,4 @@
-﻿namespace NotificationService.WebApi.DTO
+﻿namespace NotificationService.WebApi.Common.DTO
 {
     /// <summary>
     /// DTO заказа

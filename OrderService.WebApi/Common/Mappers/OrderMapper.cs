@@ -1,6 +1,4 @@
-﻿using Avro;
-using Avro.Util;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using OrderService.DataAccess.Postgres.Models;
 using OrderService.WebApi.Common.DTO;
 using OrderService.WebApi.Mediatr;

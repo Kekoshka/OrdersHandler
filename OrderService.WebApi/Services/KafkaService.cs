@@ -4,7 +4,6 @@ using Confluent.SchemaRegistry.Serdes;
 using Microsoft.Extensions.Options;
 using OrderService.WebApi.Common.Options;
 using OrderService.WebApi.Interfaces;
-using System.Threading;
 
 namespace OrderService.WebApi.Services
 {

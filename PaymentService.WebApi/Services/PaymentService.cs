@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PaymentService.DataAccess.Postgres.Context;
+﻿using PaymentService.DataAccess.Postgres.Context;
 using PaymentService.WebApi.Interfaces;
 using PaymentService.WebApi.Common.Mappers;
 using Microsoft.Extensions.Options;

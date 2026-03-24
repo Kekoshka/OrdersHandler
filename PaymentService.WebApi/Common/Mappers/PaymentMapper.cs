@@ -1,5 +1,4 @@
-﻿using Avro;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using PaymentService.DataAccess.Postgres.Models;
 using PaymentService.WebApi.Common.DTO;
 using PaymentService.WebApi.Common.Options;

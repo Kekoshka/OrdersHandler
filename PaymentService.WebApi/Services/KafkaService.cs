@@ -4,7 +4,6 @@ using Confluent.SchemaRegistry.Serdes;
 using Microsoft.Extensions.Options;
 using PaymentService.WebApi.Common.Options;
 using PaymentService.WebApi.Interfaces;
-using static Confluent.Kafka.ConfigPropertyNames;
 
 namespace PaymentService.WebApi.Services
 {

@@ -8,7 +8,6 @@ using NotificationService.WebApi.Common.AvroSchemas;
 using NotificationService.WebApi.Common.Hubs;
 using NotificationService.WebApi.Common.Mappers;
 using NotificationService.WebApi.Common.Options;
-using NotificationService.WebApi.DTO;
 
 namespace NotificationService.WebApi.Services.BackgroundServices
 {

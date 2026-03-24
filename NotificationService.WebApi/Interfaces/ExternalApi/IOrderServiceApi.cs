@@ -1,4 +1,4 @@
-﻿using NotificationService.WebApi.DTO;
+﻿using NotificationService.WebApi.Common.DTO;
 using Refit;
 
 namespace NotificationService.WebApi.Interfaces.ExternalApi

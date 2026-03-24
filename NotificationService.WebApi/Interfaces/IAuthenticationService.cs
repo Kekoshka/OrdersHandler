@@ -1,7 +1,4 @@
-﻿using System.Security.Claims;
-using System.Text;
-
-namespace NotificationService.WebApi.Interfaces
+﻿namespace NotificationService.WebApi.Interfaces
 {
     /// <summary>
     /// Необходим для аутентификации пользователей в системе
