@@ -121,9 +121,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=80
-      - ExternalServicesOptions__OrderServiceAddress=orderservice.webapi:80
+      - ExternalServicesOptions__OrderServiceAddress=http://orderservice.webapi:80
       - ExternalServicesOptions__KafkaAddress=kafka:29092
-      - ExternalServicesOptions__SchemaRegistryAddress=http://schema-registry:8081
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
       - KafkaConsumersOptions__GroupId=NotificationService
       - KafkaConsumersOptions__AutoOffsetReset=Earliest
       - KafkaConsumersOptions__EnableAutoCommit=true

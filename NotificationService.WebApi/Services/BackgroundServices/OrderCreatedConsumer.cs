@@ -28,6 +28,11 @@ namespace NotificationService.WebApi.Services.BackgroundServices
         OrderMapper _orderMapper;
 
         /// <summary>
+        /// Слушатель сообщений о создании заказов
+        /// </summary>
+        IConsumer<string, OrderCreated> _consumer;
+
+        /// <summary>
         /// Настройки слушателей Kafka
         /// </summary>
         KafkaConsumersOptions _kafkaConsumersOptions;
@@ -54,6 +59,24 @@ namespace NotificationService.WebApi.Services.BackgroundServices
             _externalServicesOptions = externalServicesOptions.Value;
             _schemaRegistry = schemaRegistryClient;
             _logger = logger;
+
+            var consumerConfig = new ConsumerConfig
+            {
+                BootstrapServers = _externalServicesOptions.KafkaAddress,
+                GroupId = _kafkaConsumersOptions.GroupId,
+                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
+                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
+            };
+
+            _consumer = new ConsumerBuilder<string, OrderCreated>(consumerConfig)
+                .SetKeyDeserializer(Deserializers.Utf8)
+                .SetValueDeserializer(new AvroDeserializer<OrderCreated>(_schemaRegistry).AsSyncOverAsync())
+                .SetErrorHandler((_, e) =>
+                {
+                    _logger.LogError( "Kafka error: {Reason}", e.Reason);
+                })
+                .Build();
+
         }
 
         /// <summary>
@@ -63,35 +86,18 @@ namespace NotificationService.WebApi.Services.BackgroundServices
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var consumerConfig = new ConsumerConfig
-            {
-                BootstrapServers = _externalServicesOptions.KafkaAddress,
-                GroupId = _kafkaConsumersOptions.GroupId,
-                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
-                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
-            };
-
-            using var consumer = new ConsumerBuilder<string, OrderCreated>(consumerConfig)
-                .SetKeyDeserializer(Deserializers.Utf8)
-                .SetValueDeserializer(new AvroDeserializer<OrderCreated>(_schemaRegistry).AsSyncOverAsync())
-                .SetErrorHandler((_, e) =>
-                {
-                    _logger.LogError("Kafka error: {Reason}", e.Reason);
-                })
-                .Build();
-
-            consumer.Subscribe(_externalServicesOptions.OrderServiceTopic);
+            _consumer.Subscribe(_externalServicesOptions.OrderServiceTopic);
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumeResult = consumer.Consume(cancellationToken);
+                var consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.Message.Value != null)
                 {
                     await HandleMessageAsync(consumeResult.Message.Value, cancellationToken);
                 }
             }
 
-            consumer.Close();
+            _consumer.Close();
         }
         
         /// <summary>
