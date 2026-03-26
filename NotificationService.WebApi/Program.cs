@@ -12,20 +12,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddJWTAuthentication();
 builder.Services.AddSchemaRegistryClient(builder.Configuration);
-builder.Services.AddKafkaConsumers();
 builder.Services.RegisterExecutingAsseblyServices();
 builder.Services.RegisterMappers();
 builder.Services.AddRefit(builder.Configuration);
+builder.Services.AddKafkaConsumers();
+
 
 var app = builder.Build();
 
 app.UseExceptionHandling();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

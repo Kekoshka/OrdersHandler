@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
-builder.Configuration.AddUserSecrets<Program>();
 builder.Services.UsePostgreSql(builder.Configuration);
 builder.Services.RegisterExecutingAsseblyServices();
 builder.Services.RegisterMappers();
@@ -21,7 +20,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseExceptionHandling();
+//app.UseExceptionHandling();
 
 using (var scope = app.Services.CreateScope())
 {

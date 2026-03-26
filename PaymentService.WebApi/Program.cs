@@ -6,7 +6,6 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddUserSecrets<Program>();
 builder.Services.RegisterMappers();
 builder.Services.UsePostgreSql(builder.Configuration);
 builder.Services.RegisterExecutingAsseblyServices();

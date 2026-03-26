@@ -21,8 +21,8 @@
         public string OrderServiceTopic { get; set; }
 
         /// <summary>
-        /// Название топика в Kafka для сервиса платежей
+        /// Адрес payment service
         /// </summary>
-        public string PaymentServiceTopic { get; set; }
+        public string PaymentServiceAddress { get; set; }
     }
 }

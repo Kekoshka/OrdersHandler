@@ -20,21 +20,13 @@ namespace NotificationService.WebApi.Services.BackgroundServices
     {
 
         IHubContext<NotificationHub> _hub;
-
-
         PaymentMapper _paymentMapper;
-
-
-        IConsumer<string, PaymentUpdated> _consumer;
-
-
         KafkaConsumersOptions _kafkaConsumersOptions;
-
-
         ExternalServicesOptions _externalServicesOptions;
-
-
         IOrderServiceApi _orderServiceApi;
+        ISchemaRegistryClient _schemaRegistry;
+
+
 
         public PaymentUpdatedConsumer(
             IOptions<ExternalServicesOptions> externalServicesOptions,
@@ -49,20 +41,6 @@ namespace NotificationService.WebApi.Services.BackgroundServices
             _kafkaConsumersOptions = kafkaConsumersOptions.Value;
             _externalServicesOptions = externalServicesOptions.Value;
             _orderServiceApi = orderServiceApi;
-
-            var consumerConfig = new ConsumerConfig
-            {
-                BootstrapServers = _externalServicesOptions.KafkaAddress,
-                GroupId = _kafkaConsumersOptions.GroupId,
-                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
-                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
-            };
-
-            var avroDeserializer = new AvroDeserializer<PaymentUpdated>(schemaRegistryClient).AsSyncOverAsync();
-            _consumer = new ConsumerBuilder<string, PaymentUpdated>(consumerConfig)
-                .SetKeyDeserializer(Deserializers.Utf8)
-                .SetValueDeserializer(avroDeserializer)
-                .Build();
         }
 
         /// <summary>
@@ -72,18 +50,33 @@ namespace NotificationService.WebApi.Services.BackgroundServices
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _consumer.Subscribe(_externalServicesOptions.PaymentServiceTopic);
+            var consumerConfig = new ConsumerConfig
+            {
+                BootstrapServers = _externalServicesOptions.KafkaAddress,
+                GroupId = _kafkaConsumersOptions.GroupId,
+                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
+                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
+            };
+
+            using var consumer = new ConsumerBuilder<string, PaymentUpdated>(consumerConfig)
+                .SetKeyDeserializer(Deserializers.Utf8)
+                .SetValueDeserializer(new AvroDeserializer<PaymentUpdated>(_schemaRegistry).AsSyncOverAsync())
+                .SetErrorHandler((_, e) => throw new Exception(e.Reason))
+                .Build();
+
+
+            consumer.Subscribe(_externalServicesOptions.PaymentServiceTopic);
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumeResult = _consumer.Consume(cancellationToken);
+                var consumeResult = consumer.Consume(cancellationToken);
                 if (consumeResult.Message.Value != null)
                 {
                     await HandleMessageAsync(consumeResult.Message.Value, cancellationToken);
                 }
             }
 
-            _consumer.Close();
+            consumer.Close();
         }
 
         /// <summary>

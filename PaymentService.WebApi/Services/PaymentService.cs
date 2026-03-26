@@ -80,7 +80,7 @@ namespace PaymentService.WebApi.Services
         /// <exception cref="NotFoundException"></exception>
         public async Task UpdatePaymentAsync(long paymentId, bool status, CancellationToken cancellationToken)
         {
-            var payment = await _context.Payments.FindAsync(paymentId, cancellationToken);
+           var payment = await _context.Payments.FindAsync(paymentId, cancellationToken);
             if (payment is null)
                 throw new NotFoundException($"Payment with id {paymentId} not found");
 
