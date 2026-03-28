@@ -1,82 +1,45 @@
-﻿using Confluent.Kafka;
+﻿using Avro;
+using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using NotificationService.WebApi.Common.AvroSchemas;
+using NotificationService.WebApi.Common.DTO;
 using NotificationService.WebApi.Common.Hubs;
 using NotificationService.WebApi.Common.Mappers;
 using NotificationService.WebApi.Common.Options;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace NotificationService.WebApi.Services.BackgroundServices
 {
     /// <summary>
     /// Обрабатывает сообщения о создании заказов
     /// </summary>
-    public class OrderCreatedConsumer : BackgroundService
+    public class OrderCreatedConsumer : ConsumerBase<OrderCreated>
     {
-
-        /// <summary>
-        /// Hub для отправки уведомлений через SignalR
-        /// </summary>
-        IHubContext<NotificationHub> _hub;
-
         /// <summary>
         /// Маппер объектов заказов
         /// </summary>
         OrderMapper _orderMapper;
 
-        /// <summary>
-        /// Слушатель сообщений о создании заказов
-        /// </summary>
-        IConsumer<string, OrderCreated> _consumer;
-
-        /// <summary>
-        /// Настройки слушателей Kafka
-        /// </summary>
-        KafkaConsumersOptions _kafkaConsumersOptions;
-
-        /// <summary>
-        /// Настройки внешних сервисов
-        /// </summary>
-        ExternalServicesOptions _externalServicesOptions;
-
-        ISchemaRegistryClient _schemaRegistry;
-        ILogger<OrderCreatedConsumer> _logger;
-
-        public OrderCreatedConsumer(
-            IOptions<ExternalServicesOptions> externalServicesOptions,
+        public OrderCreatedConsumer(IOptions<ExternalServicesOptions> externalServicesOptions,
             IOptions<KafkaConsumersOptions> kafkaConsumersOptions,
-            ISchemaRegistryClient schemaRegistryClient,
-            IHubContext<NotificationHub> hub,
-            OrderMapper orderMapper,
-            ILogger<OrderCreatedConsumer> logger) 
+            ISchemaRegistryClient schemaRegistryClient, 
+            IHubContext<NotificationHub> hub, 
+            ILogger<OrderCreatedConsumer> logger,
+            OrderMapper orderMapper) 
+            : base(externalServicesOptions, 
+                  kafkaConsumersOptions, 
+                  schemaRegistryClient, 
+                  hub, 
+                  logger)
         {
-            _hub = hub;
             _orderMapper = orderMapper;
-            _kafkaConsumersOptions = kafkaConsumersOptions.Value;
-            _externalServicesOptions = externalServicesOptions.Value;
-            _schemaRegistry = schemaRegistryClient;
-            _logger = logger;
-
-            var consumerConfig = new ConsumerConfig
-            {
-                BootstrapServers = _externalServicesOptions.KafkaAddress,
-                GroupId = _kafkaConsumersOptions.GroupId,
-                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
-                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
-            };
-
-            _consumer = new ConsumerBuilder<string, OrderCreated>(consumerConfig)
-                .SetKeyDeserializer(Deserializers.Utf8)
-                .SetValueDeserializer(new AvroDeserializer<OrderCreated>(_schemaRegistry).AsSyncOverAsync())
-                .SetErrorHandler((_, e) =>
-                {
-                    _logger.LogError( "Kafka error: {Reason}", e.Reason);
-                })
-                .Build();
-
         }
 
         /// <summary>
@@ -88,28 +51,22 @@ namespace NotificationService.WebApi.Services.BackgroundServices
         {
             _consumer.Subscribe(_externalServicesOptions.OrderServiceTopic);
 
-            while (!cancellationToken.IsCancellationRequested)
+            await Task.Run(async ()  =>
             {
-                var consumeResult = _consumer.Consume(cancellationToken);
-                if (consumeResult.Message.Value != null)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    await HandleMessageAsync(consumeResult.Message.Value, cancellationToken);
+                    var consumeResult = _consumer.Consume(cancellationToken);
+                    var message = consumeResult.Message.Value;
+                    if (message is not null)
+                    {
+                        var order = _orderMapper.OrderCreatedToOrder(message);
+                        var jsonOrder = JsonSerializer.Serialize(order);
+                        await _hub.Clients.User(message.EmailClient).SendAsync("ShowOrderCreated", jsonOrder, cancellationToken);
+                    }
                 }
-            }
+            });
 
             _consumer.Close();
-        }
-        
-        /// <summary>
-        /// Отправляет уведомление клиентам о создании заказа
-        /// </summary>
-        /// <param name="message">Сообщение о создании заказа</param>
-        /// <param name="cancellationToken">Токен отмены</param>
-        /// <returns></returns>
-        protected async Task HandleMessageAsync(OrderCreated message, CancellationToken cancellationToken)
-        {
-            var order = _orderMapper.OrderCreatedToOrder(message);
-            await _hub.Clients.User(message.EmailClient).SendAsync("ShowOrderCreated", message, cancellationToken);
         }
     }
 }

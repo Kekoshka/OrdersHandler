@@ -13,6 +13,6 @@
         /// <summary>
         /// Выполнен
         /// </summary>
-        public int IsCompleted { get; set; }
+        public int Completed { get; set; }
     }
 }

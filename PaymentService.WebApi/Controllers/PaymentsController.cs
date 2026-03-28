@@ -49,7 +49,7 @@ namespace PaymentService.WebApi.Controllers
             UpdatePaymentCommand command = new() 
             {
                 PaymentId = paymentId,
-                Status = status == _statuses.IsCompleted };
+                Status = status == _statuses.Completed };
             await _mediator.Send(command,cancellationToken);
             return NoContent();
         }

@@ -9,11 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\Kekoshka\.nuget\packages\librdkafka.redist\2.13.2\build\..\runtimes\win-x64\native\**" />
+    <Content Remove="C:\Users\Kekoshka\.nuget\packages\librdkafka.redist\2.13.2\build\..\runtimes\win-x86\native\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="2.13.2" />
-    <PackageReference Include="Confluent.SchemaRegistry" Version="2.13.2" />
     <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.13.2" />
     <PackageReference Include="ExceptionHandlingMiddlewareLib" Version="1.0.0" />
-    <PackageReference Include="librdkafka.redist" Version="2.13.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.25" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <PackageReference Include="Refit" Version="10.0.1" />

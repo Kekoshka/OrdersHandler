@@ -23,10 +23,10 @@ namespace NotificationService.WebApi.Common.Mappers
         }
 
         public partial Payment PaymentUpdatedToPayment(PaymentUpdated paymentUpdated);
-        private long DateTimeToAvroLong(DateTime dateTime)
+        private DateTime DateTimeToAvroLong(long timestampMillis)
         {
-            var utcDateTime = dateTime.ToUniversalTime();
-            return new DateTimeOffset(utcDateTime).ToUnixTimeMilliseconds();
+            var datetimeOffset =  DateTimeOffset.FromUnixTimeMilliseconds(timestampMillis);
+            return datetimeOffset.UtcDateTime;
         }
         private decimal AvroBytesToDecimal(byte[] avroBytes)
         {

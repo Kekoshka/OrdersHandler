@@ -32,7 +32,7 @@ namespace NotificationService.WebApi.Services
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.NameIdentifier, email)
             };
 
             var jwt = new JwtSecurityToken(

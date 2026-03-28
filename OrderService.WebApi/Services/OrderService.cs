@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OrderService.DataAccess.Postgres.Context;
 using OrderService.WebApi.Common.DTO;
+using OrderService.WebApi.Common.ExternalApi;
 using OrderService.WebApi.Common.Mappers;
 using OrderService.WebApi.Common.Options;
 using OrderService.WebApi.Interfaces;
-using OrderService.WebApi.Interfaces.ExternalApi;
 
 namespace OrderService.WebApi.Services
 {

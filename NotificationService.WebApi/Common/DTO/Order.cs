@@ -8,31 +8,31 @@
         /// <summary>
         /// Код заказа
         /// </summary>
-        public long Id;
+        public long Id { get; set; }
         
         /// <summary>
         /// Код товара
         /// </summary>
-        public long ProductId;
-        
+        public long ProductId { get; set; }
+
         /// <summary>
         /// Количество товаров
         /// </summary>
-        public int Amount;
-        
+        public int Amount { get; set; }
+
         /// <summary>
         /// Email заказчика
         /// </summary>
-        public string EmailClient;
-        
+        public string EmailClient { get; set; }
+
         /// <summary>
         /// Сумма заказа
         /// </summary>
-        public decimal Price;
-        
+        public decimal Price { get; set; }
+
         /// <summary>
         /// Номер телефона заказчика
         /// </summary>
-        public string PhoneNumber;
+        public string PhoneNumber { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using OrderService.WebApi.Common.DTO;
 using Refit;
 
-namespace OrderService.WebApi.Interfaces.ExternalApi
+namespace OrderService.WebApi.Common.ExternalApi
 {
     public interface IPaymentServiceApi
     {

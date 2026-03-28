@@ -8,26 +8,26 @@
         /// <summary>
         /// Код платежа
         /// </summary>
-        public long Id;
-        
+        public long Id { get; set; }
+
         /// <summary>
         /// Код заказа
         /// </summary>
-        public long OrderId;
-        
+        public long OrderId { get; set; }
+
         /// <summary>
         /// Сумма заказа
         /// </summary>
-        public decimal Price;
-        
+        public decimal Price { get; set; }
+
         /// <summary>
         /// Статус заказа
         /// </summary>
-        public bool Status;
-        
+        public bool Status { get; set; }
+
         /// <summary>
         /// Дата создания заказа
         /// </summary>
-        public DateTime DateCreate;
+        public DateTime DateCreate { get; set; }
     }
 }

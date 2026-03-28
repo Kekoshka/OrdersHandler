@@ -6,40 +6,36 @@ using ExceptionHandler.Exceptions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using NotificationService.WebApi.Common.AvroSchemas;
+using NotificationService.WebApi.Common.ExternalApi;
 using NotificationService.WebApi.Common.Hubs;
 using NotificationService.WebApi.Common.Mappers;
 using NotificationService.WebApi.Common.Options;
-using NotificationService.WebApi.Interfaces.ExternalApi;
+using System.Text.Json;
 
 namespace NotificationService.WebApi.Services.BackgroundServices
 {
     /// <summary>
     /// Сервис обработки уведомлений о обновления статуса платежа из Kafka
     /// </summary>
-    public class PaymentUpdatedConsumer : BackgroundService
+    public class PaymentUpdatedConsumer : ConsumerBase<PaymentUpdated>
     {
 
-        IHubContext<NotificationHub> _hub;
         PaymentMapper _paymentMapper;
-        KafkaConsumersOptions _kafkaConsumersOptions;
-        ExternalServicesOptions _externalServicesOptions;
         IOrderServiceApi _orderServiceApi;
-        ISchemaRegistryClient _schemaRegistry;
-
-
-
-        public PaymentUpdatedConsumer(
-            IOptions<ExternalServicesOptions> externalServicesOptions,
-            IOptions<KafkaConsumersOptions> kafkaConsumersOptions,
-            ISchemaRegistryClient schemaRegistryClient,
-            IHubContext<NotificationHub> hub,
+        public PaymentUpdatedConsumer(IOptions<ExternalServicesOptions> externalServicesOptions,
+            IOptions<KafkaConsumersOptions> kafkaConsumersOptions, 
+            ISchemaRegistryClient schemaRegistryClient, 
+            IHubContext<NotificationHub> hub, 
+            ILogger<PaymentUpdatedConsumer> logger,
             PaymentMapper paymentMapper,
-            IOrderServiceApi orderServiceApi)
+            IOrderServiceApi orderServiceApi) 
+            : base(externalServicesOptions, 
+                  kafkaConsumersOptions, 
+                  schemaRegistryClient, 
+                  hub, 
+                  logger)
         {
-            _hub = hub;
             _paymentMapper = paymentMapper;
-            _kafkaConsumersOptions = kafkaConsumersOptions.Value;
-            _externalServicesOptions = externalServicesOptions.Value;
             _orderServiceApi = orderServiceApi;
         }
 
@@ -50,50 +46,30 @@ namespace NotificationService.WebApi.Services.BackgroundServices
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var consumerConfig = new ConsumerConfig
+            _consumer.Subscribe(_externalServicesOptions.PaymentServiceTopic);
+
+            await Task.Run(async () =>
             {
-                BootstrapServers = _externalServicesOptions.KafkaAddress,
-                GroupId = _kafkaConsumersOptions.GroupId,
-                AutoOffsetReset = Enum.Parse<AutoOffsetReset>(_kafkaConsumersOptions.AutoOffsetReset ?? "Earliest"),
-                EnableAutoCommit = bool.Parse(_kafkaConsumersOptions.EnableAutoCommit ?? "true"),
-            };
-
-            using var consumer = new ConsumerBuilder<string, PaymentUpdated>(consumerConfig)
-                .SetKeyDeserializer(Deserializers.Utf8)
-                .SetValueDeserializer(new AvroDeserializer<PaymentUpdated>(_schemaRegistry).AsSyncOverAsync())
-                .SetErrorHandler((_, e) => throw new Exception(e.Reason))
-                .Build();
-
-
-            consumer.Subscribe(_externalServicesOptions.PaymentServiceTopic);
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                var consumeResult = consumer.Consume(cancellationToken);
-                if (consumeResult.Message.Value != null)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    await HandleMessageAsync(consumeResult.Message.Value, cancellationToken);
+                    var consumeResult = _consumer.Consume(cancellationToken);
+                    var message = consumeResult.Message.Value;
+                    if (message is not null)
+                    {
+                        var payment = _paymentMapper.PaymentUpdatedToPayment(message);
+                        var order = await _orderServiceApi.GetOrderAsync(message.OrderId, cancellationToken);
+                        if (order is null)
+                        {
+                            _logger.LogError($"Payment update message was not sent because the order with id {message.OrderId} was not found.");
+                            continue;
+                        }
+                        var jsonPayment = JsonSerializer.Serialize(payment);
+                        await _hub.Clients.User(order.EmailClient).SendAsync("ShowPaymentUpdated", jsonPayment, cancellationToken);
+                    }
                 }
-            }
-
-            consumer.Close();
-        }
-
-        /// <summary>
-        /// Отправляет клиентам сообщения о обновления статуса платежа
-        /// </summary>
-        /// <param name="message">Сообщение о изменении статуса платежа</param>
-        /// <param name="cancellationToken">Токен отмены</param>
-        /// <returns></returns>
-        /// <exception cref="NotFoundException">Выбрасывается в случае, если заказ с id заказа, указанном в сообщении из Kafka не найден</exception>
-        protected async Task HandleMessageAsync(PaymentUpdated message, CancellationToken cancellationToken)
-        {
-            var payment = _paymentMapper.PaymentUpdatedToPayment(message);
-            var order = await _orderServiceApi.GetOrderAsync(message.OrderId, cancellationToken);
-            if (order is null)
-                throw new NotFoundException($"Payment update message was not sent because the order with id {message.OrderId} was not found.");
-            await _hub.Clients.User(order.EmailClient).SendAsync("HandlePaymentUpdated", payment, cancellationToken);
-            Console.WriteLine(order.EmailClient);
+            });
+         
+            _consumer.Close();
         }
     }
 }
