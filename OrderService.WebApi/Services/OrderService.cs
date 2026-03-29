@@ -91,6 +91,8 @@ namespace OrderService.WebApi.Services
             var deletedRows = await _context.Orders.Where(o => o.Id == id).ExecuteDeleteAsync(cancellationToken);
             if (deletedRows == 0)
                 throw new NotFoundException($"Order with id {id} not found");
+
+            _context.ChangeTracker.Clear();
         }
     }
 }

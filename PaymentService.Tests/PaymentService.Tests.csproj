@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OrdersHandler\PaymentService.DataAccess.Postgres\PaymentService.DataAccess.Postgres.csproj" />
-    <ProjectReference Include="..\OrdersHandler\PaymentService.WebApi\PaymentService.WebApi.csproj" />
+    <ProjectReference Include="..\PaymentService.DataAccess.Postgres\PaymentService.DataAccess.Postgres.csproj" />
+    <ProjectReference Include="..\PaymentService.WebApi\PaymentService.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
