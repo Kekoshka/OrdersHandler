@@ -21,6 +21,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.WebApi"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService.Tests", "..\PaymentService.Tests\PaymentService.Tests.csproj", "{A6902BE4-4400-448F-941F-85529BC1601F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A8BC47E-04BC-4A60-BE1B-310F8CAACBEA} = {8A8BC47E-04BC-4A60-BE1B-310F8CAACBEA}
+		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24} = {9AEC63D1-6E79-4B62-AB59-0A5BD634CA24}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +82,14 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|x64
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.ActiveCfg = Release|x64
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|x64.Build.0 = Release|x64
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Debug|x64.Build.0 = Debug|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Release|x64.ActiveCfg = Release|Any CPU
+		{A6902BE4-4400-448F-941F-85529BC1601F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +100,7 @@ Global
 		{8A8BC47E-04BC-4A60-BE1B-310F8CAACBEA} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
 		{9AEC63D1-6E79-4B62-AB59-0A5BD634CA24} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
 		{D82F5664-B285-46D2-B2BC-3583A358DEAA} = {C6130C64-C8AD-4244-BE7B-4C326E89C842}
+		{A6902BE4-4400-448F-941F-85529BC1601F} = {66957C00-4C78-49A8-BE0F-D898D79A6E2C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4039AE49-1DBD-484E-9A27-2DFD48F65D7F}
