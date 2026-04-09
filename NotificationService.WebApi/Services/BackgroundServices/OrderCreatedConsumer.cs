@@ -1,19 +1,11 @@
-﻿using Avro;
-using Confluent.Kafka;
-using Confluent.Kafka.SyncOverAsync;
-using Confluent.SchemaRegistry;
-using Confluent.SchemaRegistry.Serdes;
-using Microsoft.AspNetCore.Mvc;
+﻿using Confluent.SchemaRegistry;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using NotificationService.WebApi.Common.AvroSchemas;
-using NotificationService.WebApi.Common.DTO;
 using NotificationService.WebApi.Common.Hubs;
 using NotificationService.WebApi.Common.Mappers;
 using NotificationService.WebApi.Common.Options;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 
 namespace NotificationService.WebApi.Services.BackgroundServices
 {

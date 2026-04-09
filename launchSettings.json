@@ -7,10 +7,10 @@
         "kafka": "StartWithoutDebugging",
         "notificationservice.webapi": "StartDebugging",
         "order-db": "StartWithoutDebugging",
-        "orderservice.webapi": "StartWithoutDebugging",
+        "orderservice.webapi": "StartDebugging",
         "payment-db": "StartWithoutDebugging",
         "paymentservice.webapi": "StartWithoutDebugging",
-        "schema-registry": "StartWithoutDebugging",
+        "schema-registry": "StartWithoutDebugging"
       }
     }
   }

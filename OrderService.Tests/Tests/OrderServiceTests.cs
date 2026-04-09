@@ -30,7 +30,6 @@ namespace OrderService.Tests.Tests
         [SetUp]
         public void SetUp()
         {
-            // Используем V2 Init для современных бандлов
             Batteries_V2.Init();
 
             _connection = new SqliteConnection("Data Source=:memory:");

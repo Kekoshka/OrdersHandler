@@ -1,8 +1,4 @@
-﻿using Confluent.Kafka;
-using Confluent.Kafka.SyncOverAsync;
-using Confluent.SchemaRegistry;
-using Confluent.SchemaRegistry.Serdes;
-using ExceptionHandler.Exceptions;
+﻿using Confluent.SchemaRegistry;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using NotificationService.WebApi.Common.AvroSchemas;
