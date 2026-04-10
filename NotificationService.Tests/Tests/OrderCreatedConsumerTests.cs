@@ -1,5 +1,4 @@
 ﻿using Confluent.Kafka;
-using Confluent.Kafka.Admin;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using DotNet.Testcontainers.Builders;
@@ -46,17 +45,21 @@ namespace NotificationService.Tests.Integration
                 .WithName(Guid.NewGuid().ToString())
                 .Build();
             await network.CreateAsync();
+            string kafkaName = Guid.NewGuid().ToString();
+            string schemaRegistryName = Guid.NewGuid().ToString();
+            int randomPort = new Random().Next(49152,50000);
 
             _kafkaContainer = new ContainerBuilder("apache/kafka:4.2.0")
-                .WithExposedPort(9092)
-                .WithPortBinding(9092, 9092)
+                .WithExposedPort(randomPort)
+                .WithPortBinding(randomPort, randomPort)
                 .WithNetwork(network)
-                .WithName("kafka")
+                .WithName(kafkaName)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(".*Kafka Server started.*"))
                 .WithEnvironment("KAFKA_PROCESS_ROLES", "broker,controller")
                 .WithEnvironment("KAFKA_NODE_ID", "1")
-                .WithEnvironment("KAFKA_CONTROLLER_QUORUM_VOTERS", "1@kafka:9093")
-                .WithEnvironment("KAFKA_LISTENERS", "INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093")
-                .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", "INTERNAL://kafka:29092,EXTERNAL://localhost:9092,CONTROLLER://kafka:9093")
+                .WithEnvironment("KAFKA_CONTROLLER_QUORUM_VOTERS", $"1@{kafkaName}:9093")
+                .WithEnvironment("KAFKA_LISTENERS", $"INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:{randomPort},CONTROLLER://0.0.0.0:9093")
+                .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", $"INTERNAL://{kafkaName}:29092,EXTERNAL://localhost:{randomPort},CONTROLLER://{kafkaName}:9093")
                 .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT")
                 .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "INTERNAL")
                 .WithEnvironment("KAFKA_CONTROLLER_LISTENER_NAMES", "CONTROLLER")
@@ -69,20 +72,18 @@ namespace NotificationService.Tests.Integration
                 .WithExposedPort(8081)
                 .WithPortBinding(8081, true)
                 .WithNetwork(network)
-                .WithName("schema-registry")
-                .DependsOn(_kafkaContainer)
-                .WithEnvironment("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
-                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://kafka:29092")
+                .WithName(schemaRegistryName)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged(".*Server started, listening for requests.*"))
+                .WithEnvironment("SCHEMA_REGISTRY_HOST_NAME", schemaRegistryName)
+                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", $"PLAINTEXT://{kafkaName}:29092")
                 .WithEnvironment("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
                 .Build();
 
             await _kafkaContainer.StartAsync();
-            await Task.Delay(10000);
             await _schemaRegistryContainer.StartAsync();
-            await Task.Delay(10000);
 
             _schemaRegistryAddress = "http://localhost:" + _schemaRegistryContainer.GetMappedPublicPort(8081).ToString();
-            _kafkaBootstrapServers = "localhost:9092";
+            _kafkaBootstrapServers = $"localhost:{randomPort}";
 
         }
 
@@ -199,5 +200,6 @@ namespace NotificationService.Tests.Integration
             var big = little.Reverse().ToArray();
             return big;
         }
+
     }
 }
