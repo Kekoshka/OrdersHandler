@@ -1,0 +1,11 @@
+
+services:
+  notificationservice.webapi:
+    labels:
+      com.microsoft.visual-studio.project-name: "NotificationService.WebApi"
+  paymentservice.webapi:
+    labels:
+      com.microsoft.visual-studio.project-name: "PaymentService.WebApi"
+  orderservice.webapi:
+    labels:
+      com.microsoft.visual-studio.project-name: "OrderService.WebApi"

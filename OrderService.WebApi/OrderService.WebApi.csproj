@@ -6,9 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>cb327dc6-f5bd-42ed-86c8-92714c03d626</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Common\AvroSchemas\Avsc\OrderCreated.avsc" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.SchemaRegistry" Version="2.13.2" />
+    <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.13.2" />
+    <PackageReference Include="ExceptionHandlingMiddlewareLib" Version="1.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
@@ -17,8 +25,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Refit" Version="10.0.1" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="10.0.1" />
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="10.1.5" />
@@ -29,5 +39,4 @@
   <ItemGroup>
     <ProjectReference Include="..\OrderService.DataAccess.Postgres\OrderService.DataAccess.Postgres.csproj" />
   </ItemGroup>
-
 </Project>

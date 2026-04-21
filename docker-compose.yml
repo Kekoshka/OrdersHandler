@@ -1,0 +1,145 @@
+services:
+  kafka:
+    image: apache/kafka:4.2.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092" 
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092,CONTROLLER://kafka:9093
+      KAFKA_LOG4J_LOGGERS: "kafka.request.logger=DEBUG"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - backend
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+     - kafka
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:8081'
+    networks:
+      - backend
+
+  order-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass
+      POSTGRES_DB: OrderService
+    ports:
+      - "5432:5432"
+    volumes:
+      - order-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderuser -d OrderService"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend
+
+  payment-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: paymentuser
+      POSTGRES_PASSWORD: paymentpass
+      POSTGRES_DB: PaymentService
+    ports:
+      - "5433:5432"
+    volumes:
+      - payment-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paymentuser -d PaymentService"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend
+
+  orderservice.webapi:
+    build:
+      context: .
+      dockerfile: /OrderService.WebApi/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__PostgreSql=Host=order-db;Port=5432;Database=OrderService;Username=orderuser;Password=orderpass
+      - ExternalServicesOptions__PaymentServiceAddress=http://paymentservice.webapi:80
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - ExternalServicesOptions__OrderServiceTopic=order-service
+    depends_on:
+      - order-db
+      - kafka
+    networks:
+      - backend
+
+  paymentservice.webapi:
+    build:
+      context: .
+      dockerfile: /PaymentService.WebApi/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__PostgreSql=Host=payment-db;Port=5432;Database=PaymentService;Username=paymentuser;Password=paymentpass
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - ExternalServicesOptions__PaymentServiceTopic=payment-service
+    depends_on:
+      - payment-db
+      - kafka
+    networks:
+      - backend
+
+  notificationservice.webapi:
+    build:
+      context: .
+      dockerfile: /NotificationService.WebApi/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ExternalServicesOptions__OrderServiceAddress=http://orderservice.webapi:80
+      - ExternalServicesOptions__KafkaAddress=kafka:29092
+      - ExternalServicesOptions__SchemaRegistryAddress=schema-registry:8081
+      - KafkaConsumersOptions__GroupId=NotificationService
+      - KafkaConsumersOptions__AutoOffsetReset=Earliest
+      - KafkaConsumersOptions__EnableAutoCommit=true
+      - ExternalServicesOptions__OrderServiceTopic=order-service
+      - ExternalServicesOptions__PaymentServiceTopic=payment-service    
+    depends_on:
+      - kafka
+      - orderservice.webapi
+    networks:
+      - backend
+
+volumes:
+  order-data:
+  payment-data:
+  kafka-data:
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,31 @@
+{
+  "type": "record",
+  "name": "PaymentUpdated",
+  "namespace": "PaymentService",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "long"
+    },
+    {
+      "name": "OrderId",
+      "type": "long"
+    },
+    {
+      "name": "Price",
+      "type": "bytes",
+      "logicalType": "decimal",
+      "scale": 38,
+      "precision": 10
+    },
+    {
+      "name": "Status",
+      "type": "boolean"
+    },
+    {
+      "name": "DateCreate",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    }
+  ]
+}

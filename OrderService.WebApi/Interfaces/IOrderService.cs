@@ -1,14 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OrderService.DataAccess.Postgres.Context;
-using OrderService.DataAccess.Postgres.Models;
-using OrderService.DataAccess.Postgres.Models.DTO;
-using OrderService.WebApi.Mappers;
-using OrderService.WebApi.Mappers.CustomExceptions;
+﻿using OrderService.WebApi.Common.DTO;
 
 namespace OrderService.WebApi.Interfaces
 {
     /// <summary>
-    /// Определяет контракт для сервиса работы с заказами
+    /// Определяет контракты для сервиса работы с заказами
     /// </summary>
     public interface IOrderService
     {

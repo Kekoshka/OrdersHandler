@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "kafka": "StartWithoutDebugging",
+        "notificationservice.webapi": "StartDebugging",
+        "order-db": "StartWithoutDebugging",
+        "orderservice.webapi": "StartDebugging",
+        "payment-db": "StartWithoutDebugging",
+        "paymentservice.webapi": "StartWithoutDebugging",
+        "schema-registry": "StartWithoutDebugging"
+      }
+    }
+  }
+}
